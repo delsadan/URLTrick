@@ -2,17 +2,17 @@
 
 ## 1、 简介
 URLTrick使用场景，运维监控，侧信道URL访问监控。
-- 支持指定时间内，触发设定阈值指定次数（大于或等于），即告警
-- 支持指定时间内，未到设定阈值（小于），即告警
+- 支持指定时间内，触发设定阈值指定次数（大于或等于），即微信推送消息告警
+- 支持指定时间内，未到设定阈值（小于），即微信推送消息告警
 
 
 代码逻辑：利用gin框架起一个indexURL，然后识别访问的该路径的路径参数及header头，有符合规则（key）的md5哈希入库（Redis），通过Redis的INCR 和 EXPIRE 实现有效期的阈值监控。
 同时没写redis初始化清除键及值，所以会复用redis之前键，若之前有设timeLimitSeconds为0，然后有设有值，后面的不会生效。需去redis里清空该键值。
-同时借助WXpusher实现触发阈值，微信告警的目的。
+同时借助WXpusher实现触发阈值，微信推送消息告警的目的。
 
-整体逻辑非常简单，我主要用来看我的小爬虫是否正常运行
+整体逻辑非常简单，我主要用来看我的小爬虫是否正常运行，还有做一些特殊的隐藏告警
 
-第一次用GO写程序，本来可以不用redis，为了试试redis，所以用的，可能有bug，凑合用用了。
+第一次用GO写程序，本来可以不用redis，为了试试redis库，所以故意写了复杂点，可能有bug，凑合用用了。
 
 ## 2、 配置解读
 
@@ -41,10 +41,10 @@ URLTrick使用场景，运维监控，侧信道URL访问监控。
     "password": "",
     "db": 0
   },
-  # wxpusher配置, 详见docs: https://wxpusher.dingliqc.com/docs/#/?id=send-msg
+  # wxpusher配置, 详见docs: https://wxpusher.dingliqc.com/docs/#/
   "wxhelper": {
-    "appToken": "AT_V66ge0FULFmXWULPSOnk505TrKn1rM5E", # appToken
-    "topicIds": [7677]  # 主题Topic
+    "appToken": "AT_XXXXX", # appToken, 使用前务必修改
+    "topicIds": [10000]  # 主题Topic, 使用前务必修改
   },
   # 全局告警反转设置, 默认false，为达到阈值触发告警，反之true，则告警阈值有效期内没有达到告警次数告警，两者的实现方式并不一样，后者的告警需等阈值时间到以后，发送告警消息
   "reverse" : false,  # 支持热加载
@@ -100,4 +100,11 @@ RestartSec=60s
 
 [Install]
 WantedBy=multi-user.target
+
+systemctl start urlTrick
+systemctl enable urlTrick  # 开启自启动
 ```
+
+## 4、使用示例
+
+根据以上配置文件, 则60s内访问3次: http://0.0.0.0:18088/heartbeat/abc, 即可触发微信告警, 或者携带X-Custom-Num=4的headers头访问3次: http://0.0.0.0:18088/heartbeat, 也会触发告警
