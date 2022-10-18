@@ -1,0 +1,30 @@
+{
+  "triggers": [
+    {
+      "key": "X-Custom-Num=4",
+      "position": "header",
+      "threshold": 3,
+      "timeLimitSeconds": 10
+    },
+    {
+      "key": "abcdef",
+      "position": "urlParameter",
+      "threshold": 3,
+      "timeLimitSeconds": 10
+    }
+  ],
+  "indexUrl": "heartbeat",
+  "redis": {
+    "addr": "localhost:6379",
+    "password": "",
+    "db": 0
+  },
+  "wxhelper": {
+    "appToken": "AT_XXXX",
+    "topicIds": [
+      10000
+    ]
+  },
+  "reverse": false,
+  "listenHost": "0.0.0.0:28088"
+}
